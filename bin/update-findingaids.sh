@@ -11,19 +11,24 @@ GIT=`which git`
 DATE=`which date`
 BC=`which bc`
 
-NOW=`${DATE} '+%s'`
-SINCE=$((${NOW} - 86400))	# 24 hours
-
+OFFSET=86400	# 24 hours
 GITHUB_USER="whosonfirst-data"
 
+CUSTOM_REPOS=""
 TOKEN_URI=""
 USAGE=""
 
-while getopts "T:h" opt; do
+while getopts "O:R:T:h" opt; do
     case "$opt" in
         h) 
 	    USAGE=1
+	    ;;
+	O)
+	    OFFSET=$OPTARG
 	    ;;	
+	R)
+	    CUSTOM_REPOS=$OPTARG
+	    ;;
 	T)
 	    TOKEN_URI=$OPTARG
 	    ;;
@@ -49,21 +54,33 @@ then
     exit 1
 fi
 
-REPOS=`${SOURCES} -provider-uri "github://whosonfirst-data?prefix=whosonfirst-data-&exclude=whosonfirst-data-venue-&updated_since=${SINCE}"`
+NOW=`${DATE} '+%s'`
+SINCE=$((${NOW} - ${OFFSET}))
+
+if [ "${CUSTOM_REPOS}" = "" ]
+then
+    echo "Fetch repos updated since ${SINCE} (offset ${OFFSET} seconds since now)"
+    REPOS=`${SOURCES} -provider-uri "github://whosonfirst-data?prefix=whosonfirst-data-&exclude=whosonfirst-data-venue-&updated_since=${SINCE}"`    
+else
+    echo "Update custom repos ${CUSTOM_REPOS}"
+
+    for REPO in ${CUSTOM_REPOS}
+    do
+	REPOS="${REPOS} https://github.com/whosonfirst-data/${REPO}.git"
+    done
+fi
 
 if [ "${REPOS}" = "" ]
 then
     exit
 fi
 
-${GIT} clone https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/whosonfirst-data/whosonfirst-findingaids.git /usr/local/data/whosonfirst-findingaid
-
 for REPO in ${REPOS}
 do
     NAME=`basename ${REPO} | sed 's/\.git//g'`
     echo "Update finding aid for ${NAME}"
     
-    PRODUCER_URI="csv://?archive=/usr/local/data/whosonfirst-findingaid/data/${NAME}.db"
+    PRODUCER_URI="csv://?archive=/usr/local/data/whosonfirst-findingaid/data/${NAME}.tar.gz"
     
     time ${POPULATE} -iterator-uri git:///tmp -producer-uri ${PRODUCER_URI} ${REPO}
 done
