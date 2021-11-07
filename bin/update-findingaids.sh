@@ -96,6 +96,7 @@ do
 done
 
 cd /usr/local/data/whosonfirst-findingaid
+git pull origin main
 git add data
 git commit -m "update finding aids for ${NAMES}"
 git push origin main
