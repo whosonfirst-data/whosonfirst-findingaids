@@ -18,7 +18,7 @@ CUSTOM_REPOS=""
 TOKEN_URI=""
 USAGE=""
 
-while getopts "O:R:T:h" opt; do
+while getopts "O:R:T:U:h" opt; do
     case "$opt" in
         h) 
 	    USAGE=1
@@ -32,6 +32,9 @@ while getopts "O:R:T:h" opt; do
 	T)
 	    TOKEN_URI=$OPTARG
 	    ;;
+	U)
+	    GITHUB_USER=$OPTARG
+	    ;;	
 	:   )
 	    echo "WHAT WHAT WHAT"
 	    ;;
@@ -75,6 +78,7 @@ then
     exit
 fi
 
+echo "Clone whosonfirst-data/whosonfirst-findingaids as ${GITHUB_USER}"
 ${GIT} clone --depth 1 https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/whosonfirst-data/whosonfirst-findingaids.git /usr/local/data/whosonfirst-findingaid
 
 for REPO in ${REPOS}
@@ -98,5 +102,5 @@ done
 cd /usr/local/data/whosonfirst-findingaid
 git pull origin main
 git add data
-git commit -m "update finding aids for ${NAMES}"
+git commit -m "update finding aids for ${NAMES}" data
 git push origin main
