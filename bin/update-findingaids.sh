@@ -75,7 +75,7 @@ then
     exit
 fi
 
-${GIT} clone https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/whosonfirst-data/whosonfirst-findingaids.git /usr/local/data/whosonfirst-findingaid
+${GIT} clone --depth 1 https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/whosonfirst-data/whosonfirst-findingaids.git /usr/local/data/whosonfirst-findingaid
 
 for REPO in ${REPOS}
 do
