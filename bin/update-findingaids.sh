@@ -81,6 +81,7 @@ fi
 
 if [ "${REPOS}" = "" ]
 then
+    echo "No repos to update, exiting"
     exit
 fi
 
