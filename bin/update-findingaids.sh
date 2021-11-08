@@ -12,7 +12,7 @@ DATE=`which date`
 BC=`which bc`
 
 OFFSET=86400	# 24 hours
-GITHUB_USER="whosonfirst-data"
+GITHUB_USER="whosonfirst-bot"
 
 CUSTOM_REPOS=""
 TOKEN_URI=""
