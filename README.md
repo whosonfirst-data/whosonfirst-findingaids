@@ -11,3 +11,8 @@ This is work in progress and still considered experimental. For background pleas
 Venue-specific finding aids are maintained in the [whosonfirst-findingaids-venue](https://github.com/whosonfirst-data/whosonfirst-findingaids-venue) repository.
 
 * https://github.com/whosonfirst-data/whosonfirst-data/discussions/1967
+
+## See also
+
+* https://github.com/whosonfirst/go-whosonfirst-findingaids
+* https://github.com/whosonfirst/go-reader-findingaid
