@@ -49,6 +49,10 @@ then
     exit 0
 fi
 
+echo "Update finding aids"
+
+echo "Retrieve GitHub acccess token"
+
 GITHUB_TOKEN=`${RUNTIMEVAR} "${TOKEN_URI}"`
 
 if [ "${GITHUB_TOKEN}" = "" ]
@@ -56,6 +60,8 @@ then
     echo "Missing GitHub access token"
     exit 1
 fi
+
+echo "Fetch repositories"
 
 NOW=`${DATE} '+%s'`
 SINCE=$((${NOW} - ${OFFSET}))
@@ -98,6 +104,8 @@ do
     NAME=`basename ${REPO} | sed 's/\.git//g'`
     NAMES="${NAMES} ${NAME}"
 done
+
+echo "Commit changes"
 
 cd /usr/local/data/whosonfirst-findingaid
 git pull origin main
