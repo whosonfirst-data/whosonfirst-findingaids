@@ -1,7 +1,7 @@
 # https://www.git-scm.com/book/en/v2/Customizing-Git-Git-Configuration
 
 [user]
-	name = sfomuseumbot
+	name = whosonfirst-bot
 	email = devnull@localhost
 
 [core]
