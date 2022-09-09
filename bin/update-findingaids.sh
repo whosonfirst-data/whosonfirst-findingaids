@@ -6,6 +6,7 @@
 SOURCES=`which wof-findingaid-sources`
 POPULATE=`which wof-findingaid-populate`
 RUNTIMEVAR=`which runtimevar`
+URLENCODE=`which urlencode`
 
 GIT=`which git`
 DATE=`which date`
@@ -18,8 +19,13 @@ CUSTOM_REPOS=""
 TOKEN_URI=""
 USAGE=""
 
-while getopts "O:R:T:U:h" opt; do
+CREDENTIALS="iam:"
+
+while getopts "C:O:R:T:U:h" opt; do
     case "$opt" in
+	C)
+	    CREDENTIALS=${OPTARG}
+	    ;;
         h) 
 	    USAGE=1
 	    ;;
@@ -69,7 +75,7 @@ SINCE=$((${NOW} - ${OFFSET}))
 if [ "${CUSTOM_REPOS}" = "" ]
 then
     echo "Fetch repos updated since ${SINCE} (offset ${OFFSET} seconds since now)"
-    REPOS=`${SOURCES} -provider-uri "github://whosonfirst-data?prefix=whosonfirst-data-&exclude=whosonfirst-data-venue-&updated_since=${SINCE}"`    
+    REPOS=`${SOURCES} -provider-uri "github://whosonfirst-data?prefix=whosonfirst-data-&updated_since=${SINCE}"`    
 else
     echo "Update custom repos ${CUSTOM_REPOS}"
 
@@ -81,21 +87,38 @@ fi
 
 if [ "${REPOS}" = "" ]
 then
-    echo "No repos to update, exiting"
     exit
 fi
 
+# Clone the whosonfirst-findingaids repo - we are going to write CSV data to this target
+
 echo "Clone whosonfirst-data/whosonfirst-findingaids as ${GITHUB_USER}"
-${GIT} clone --depth 1 https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/whosonfirst-data/whosonfirst-findingaids.git /usr/local/data/whosonfirst-findingaid
+${GIT} clone --depth 1 https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/whosonfirst-data/whosonfirst-findingaids.git /usr/local/data/whosonfirst-findingaids
 
 for REPO in ${REPOS}
 do
     NAME=`basename ${REPO} | sed 's/\.git//g'`
     echo "Update finding aid for ${NAME}"
+
+    # Clone the repo once since we want to crawl it with multiple producers (CSV and DynamoDB)
+    # We may want to revisit the use of the repo:// iterator and instead generate a "filelist"
+    # of updated records and iterate over that. For the time being this will do.
     
-    PRODUCER_URI="csv://?archive=/usr/local/data/whosonfirst-findingaid/data/${NAME}.tar.gz"
+    ${GIT} clone --depth 1 ${REPO} /usr/local/data/${NAME}
     
-    time ${POPULATE} -iterator-uri git:///tmp -producer-uri ${PRODUCER_URI} ${REPO}
+    CSV_URI="csv://?archive=/usr/local/data/whosonfirst-findingaids/data/${NAME}.tar.gz"
+    DYNAMODB_URI="awsdynamodb://findingaid?partition_key=id&region=us-west-2&credentials=${CREDENTIALS}"
+
+    ENC_CSV_URI=`echo ${CSV_URI} | urlencode -stdin`
+    ENC_DYNAMODB_URI=`echo ${DYNAMODB_URI} | urlencode -stdin`    
+
+    PRODUCER_URI="multi://?producer=${ENC_CSV_URI}&producer=${ENC_DYNAMODB_URI}"
+    echo "Populate w/ {$PRODUCER_URI}"
+
+    time ${POPULATE} -iterator-uri repo:// -producer-uri ${PRODUCER_URI}  /usr/local/data/${NAME}
+
+    rm -rf /usr/local/data/${REPO}
+    
 done
 
 NAMES=""
@@ -108,7 +131,7 @@ done
 
 echo "Commit changes"
 
-cd /usr/local/data/whosonfirst-findingaid
+cd /usr/local/data/whosonfirst-findingaids
 git pull origin main
 git add data
 git commit -m "update finding aids for ${NAMES}" data
