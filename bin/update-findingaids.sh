@@ -107,7 +107,7 @@ do
     ${GIT} clone --depth 1 ${REPO} /usr/local/data/${NAME}
     
     CSV_URI="csv://?archive=/usr/local/data/whosonfirst-findingaids/data/${NAME}.tar.gz"
-    DYNAMODB_URI="awsdynamodb://findingaid?partition_key=id&region=us-west-2&credentials=${CREDENTIALS}"
+    DYNAMODB_URI="awsdynamodb://findingaid?partition_key=id&region=us-east-1&credentials=${CREDENTIALS}"
 
     ENC_CSV_URI=`echo ${CSV_URI} | urlencode -stdin`
     ENC_DYNAMODB_URI=`echo ${DYNAMODB_URI} | urlencode -stdin`    
