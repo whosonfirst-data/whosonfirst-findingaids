@@ -6,7 +6,7 @@
 SOURCES=`which wof-findingaid-sources`
 POPULATE=`which wof-findingaid-populate`
 RUNTIMEVAR=`which runtimevar`
-URLENCODE=`which urlencode`
+URLESCAPE=`which urlescape`
 
 GIT=`which git`
 DATE=`which date`
@@ -87,6 +87,7 @@ fi
 
 if [ "${REPOS}" = "" ]
 then
+    echo "Nothing to update"
     exit
 fi
 
@@ -109,8 +110,8 @@ do
     CSV_URI="csv://?archive=/usr/local/data/whosonfirst-findingaids/data/${NAME}.tar.gz"
     DYNAMODB_URI="awsdynamodb://findingaid?partition_key=id&region=us-east-1&credentials=${CREDENTIALS}"
 
-    ENC_CSV_URI=`echo ${CSV_URI} | urlencode -stdin`
-    ENC_DYNAMODB_URI=`echo ${DYNAMODB_URI} | urlencode -stdin`    
+    ENC_CSV_URI=`echo ${CSV_URI} | urlescape -stdin`
+    ENC_DYNAMODB_URI=`echo ${DYNAMODB_URI} | urlescape -stdin`    
 
     PRODUCER_URI="multi://?producer=${ENC_CSV_URI}&producer=${ENC_DYNAMODB_URI}"
     echo "Populate w/ {$PRODUCER_URI}"

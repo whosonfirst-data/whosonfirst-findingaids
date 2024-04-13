@@ -1,6 +1,6 @@
 #!/bin/sh
 
-CSV2DOCSTORE=`which csv2docstore`
+CSV2DOCSTORE=`which wof-findingaid-csv2docstore`
 GIT=`which git`
 
 CREDENTIALS="iam:"
