@@ -87,6 +87,7 @@ fi
 
 if [ "${REPOS}" = "" ]
 then
+    echo "Nothing to update"
     exit
 fi
 
